@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ZAPPY BOT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .chatbox {
+      background: #111;
+      border: 1px solid red;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .messages {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .messages p {
+      margin: 5px 0;
+    }
+    .user {
+      color: cyan;
+    }
+    .bot {
+      color: red;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    input {
+      width: 70%;
+    }
+    button {
+      background: red;
+      color: white;
+      border: none;
+      width: 28%;
+    }
+  </style>
+</head>
+<body>
+  <h2>🤖 ZAPPY BOT</h2>
+  <div class="chatbox">
+    <div class="messages" id="messages">
+      <p class="bot">ZAPPY BOT: Hello! Ask me anything.</p>
+    </div>
+    <div>
+      <input type="text" id="userInput" placeholder="Your message" />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const messages = document.getElementById("messages");
+      messages.innerHTML += `<p class="user">You: ${msg}</p>`;
+      messages.innerHTML += `<p class="bot" id="typing">ZAPPY BOT: typing...</p>`;
+      input.value = "";
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg }),
+        });
+        const data = await res.json();
+        document.getElementById("typing").remove();
+        messages.innerHTML += `<p class="bot">ZAPPY BOT: ${data.reply}</p>`;
+      } catch {
+        document.getElementById("typing").remove();
+        messages.innerHTML += `<p class="bot">ZAPPY BOT: Error talking to the server.</p>`;
+      }
+
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+</body>
+</html>
